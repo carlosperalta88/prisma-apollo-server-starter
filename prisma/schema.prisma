@@ -1,0 +1,100 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model UserStatus {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(32)
+  user      Users[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SubscriptionType {
+  id            Int             @id @default(autoincrement())
+  name          String          @db.VarChar(32)
+  price         Int?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  subscriptions Subscriptions[]
+  products      Products[]
+}
+
+model ProductType {
+  id        Int        @id @default(autoincrement())
+  name      String     @db.VarChar(32)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  products  Products[]
+}
+
+model MediaType {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(32)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  media     Media[]
+}
+
+model Users {
+  id            Int            @id @default(autoincrement())
+  firstName     String?        @db.VarChar(255)
+  lastName      String?        @db.VarChar(255)
+  dob           String?        @db.VarChar(255)
+  email         String         @unique @db.VarChar(255)
+  phone         Int?            @db.Integer
+  active        Boolean        @default(true)
+  status        UserStatus?    @relation(fields: [statusId], references: [id])
+  statusId      Int?
+  subscriptions Subscriptions?
+  products      Products[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model Subscriptions {
+  id                 Int              @id @default(autoincrement())
+  active             Boolean          @default(true)
+  type               SubscriptionType @relation(fields: [subscriptionTypeId], references: [id])
+  subscriptionTypeId Int
+  users              Users            @relation(fields: [userId], references: [id])
+  userId             Int
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+}
+
+model Media {
+  id        Int        @id @default(autoincrement())
+  url       String     @db.VarChar(255)
+  mediaType MediaType? @relation(fields: [typeId], references: [id])
+  typeId    Int?
+  products  Products   @relation(fields: [productId], references: [id])
+  productId Int
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Products {
+  id                 Int               @id @default(autoincrement())
+  name               String            @db.VarChar(255)
+  description        String            @db.VarChar(255)
+  type               ProductType       @relation(fields: [typeId], references: [id])
+  typeId             Int
+  active             Boolean?          @default(true)
+  version            String            @db.VarChar(2)
+  price              Int?
+  subscriptionType   SubscriptionType? @relation(fields: [subscriptionTypeId], references: [id])
+  subscriptionTypeId Int?
+  users              Users[]
+  media              Media[]
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+}
