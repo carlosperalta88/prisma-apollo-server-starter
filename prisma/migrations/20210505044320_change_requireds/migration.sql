@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "Media" ALTER COLUMN "typeId" DROP NOT NULL;
